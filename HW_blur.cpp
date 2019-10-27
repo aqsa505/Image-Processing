@@ -24,6 +24,7 @@ HW_blur(ImagePtr I1, int filterW, int filterH, ImagePtr I2)
 	int h = I1->height();
 	int total = w * h;
 
+	//create a temporary buffer
 	ImagePtr I3;
 	IP_copyImageHeader(I1, I3);
 
@@ -48,9 +49,9 @@ HW_blur(ImagePtr I1, int filterW, int filterH, ImagePtr I2)
 				dest += w;
 			}
 		}
+		dest = dest - total;
 	}
-	dest = dest - total;
-
+	
 	//check if filterW is greater then 1 then blur horizontal
 	if (filterH == 1) {
 		for (endd = dest + total; dest < endd;)
@@ -72,7 +73,7 @@ void blur1D(ChannelPtr<uchar>src, int len, int stride, int ww, ChannelPtr<uchar>
 	int i, j;
 	int k = 0;
 	if (ww % 2 == 0) ww++;
-	int padding = ww  / 2;
+	int padding = ww / 2;
 	int bufferWidth = len + ww - 1;
 	short* buffer = new short[bufferWidth];
 
@@ -80,30 +81,29 @@ void blur1D(ChannelPtr<uchar>src, int len, int stride, int ww, ChannelPtr<uchar>
 		buffer[i] = *src;
 	}
 
-	for (i = padding; i < padding + len; i++) {
+	for (i = padding; i < padding+len; i++) {
 		buffer[i] = src[k];
 		k += stride;
 	}
 
-	for (i = (padding + len); i < padding + len; i++) {
-		int index = i - stride;
-		buffer[i] = src[index];
+	for (i = (padding + len); i < bufferWidth; i++) {
+		
+		buffer[i] = src[k-stride];
 	}
 
 	long sum = 0;
-	for (i = 0; i < ww; i++) {
-
-	}
+	
 	for (i = 0; i < ww; i++) {
 		sum += buffer[i];
 	}
-	for (int i = 0; i < len; i++) {
-
-	}
+	
 	for (int i = 0; i < len; i++) {
 		dst[i*stride] = sum / ww;
 		sum += (buffer[i + ww] - buffer[i]);
 	}
 
 }
+
+
+
 
